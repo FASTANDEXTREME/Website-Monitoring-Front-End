@@ -1,20 +1,15 @@
 import gspread
-from google.oauth2.service_account import Credentials
 from datetime import timedelta, datetime
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import schedule
 import os
 import time
 
-
+gc = gspread.service_account(filename="credentials.json")
 
 def update_graph():
     total_downtime = timedelta()  
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credentials = Credentials.from_service_account_file("credentials.json", scopes=scope)
-    client = gspread.authorize(credentials)
-    spreadsheet = client.open("Website Monitoring")
-
+    spreadsheet = gc.open("Website Monitoring")
     worksheet = spreadsheet.sheet1  
 
     ## CALCULATE TOTAL TIME OF MONITORING ##
@@ -33,20 +28,30 @@ def update_graph():
             h, m, s = map(int, downtime.split(":"))  
             total_downtime += timedelta(hours=h, minutes=m, seconds=s)
 
-
-    # Calculating uptime and make Chart ##
+    # Calculating uptime and making chart ##
     total_uptime = total_monitoring_time - total_downtime
+
     labels = ['Uptime', 'Downtime']
     times = [total_uptime.total_seconds(), total_downtime.total_seconds()]  
-    plt.figure(figsize=(10, 10))
-    plt.pie(times, labels=labels, autopct='%1.1f%%', startangle=90, colors=['#1f77b4', '#ff7f0e'])
-    plt.axis('equal')  
-    plt.title("Website Monitoring: Uptime vs Downtime")
+    fig = go.Figure(data=[go.Pie(labels=labels, values=times, hole=.3)])
+    fig.update_traces(marker=dict(colors=['#1f77b4', '#ff7f0e']),
+                      hoverinfo='label+percent',  # Show percent on hover
+                      textinfo='percent',         # Show percent in text
+                      textfont_size=15)
+    
+    fig.update_layout(title="Website Monitoring: Uptime vs Downtime", title_x=0.5)
     last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    plt.figtext(0.5, 0.01, f"Last Updated: {last_updated}", ha='center', fontsize=12)
+    fig.add_annotation(
+        x=0.5,
+        y=-0.1,
+        text=f"Last Updated: {last_updated}",
+        showarrow=False,
+        font=dict(size=12),
+        xref="paper", yref="paper"
+    )
+
     relative_path = os.path.join("static", "images", "graph.png")
-    plt.savefig(relative_path, bbox_inches='tight') 
-    plt.close()  
+    fig.write_image(relative_path, format="png") 
 
 schedule.every(15).seconds.do(update_graph)
 while True:
