@@ -1,5 +1,4 @@
 flask
 gspread
-plotly
+matplotlib
 schedule
-kal
