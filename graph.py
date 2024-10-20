@@ -2,7 +2,6 @@ import gspread
 from datetime import timedelta, datetime
 import matplotlib.pyplot as plt
 import schedule
-import os
 import time
 
 gc = gspread.service_account(filename="/home/jasjitbanisa/WEBSIEBTESJRGHSEGHJ/credentials.json")
