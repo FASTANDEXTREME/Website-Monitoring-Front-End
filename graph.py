@@ -1,18 +1,18 @@
 import gspread
 from datetime import timedelta, datetime
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 import schedule
 import os
 import time
 
-gc = gspread.service_account(filename="credentials.json")
-
+gc = gspread.service_account(filename="/home/jasjitbanisa/WEBSIEBTESJRGHSEGHJ/credentials.json")
 def update_graph():
     total_downtime = timedelta()  
+
     spreadsheet = gc.open("Website Monitoring")
     worksheet = spreadsheet.sheet1  
 
-    ## CALCULATE TOTAL TIME OF MONITORING ###
+    ## CALCULATE TOTAL TIME OF MONITORING ##
     dates = worksheet.col_values(4) 
     times = worksheet.col_values(5)  
     timestamps = [datetime.strptime(f"{date} {time}", "%d/%m/%Y %I:%M:%S %p") for date, time in zip(dates[1:], times[1:])]
@@ -33,25 +33,15 @@ def update_graph():
 
     labels = ['Uptime', 'Downtime']
     times = [total_uptime.total_seconds(), total_downtime.total_seconds()]  
-    fig = go.Figure(data=[go.Pie(labels=labels, values=times, hole=.3)])
-    fig.update_traces(marker=dict(colors=['#1f77b4', '#ff7f0e']),
-                      hoverinfo='label+percent',  # Show percent on hover
-                      textinfo='percent',         # Show percent in text
-                      textfont_size=15)
-    
-    fig.update_layout(title="Website Monitoring: Uptime vs Downtime", title_x=0.5)
+    plt.figure(figsize=(10, 10))
+    plt.pie(times, labels=labels, autopct='%1.1f%%', startangle=90, colors=['#1f77b4', '#ff7f0e'])
+    plt.axis('equal')  
+    plt.title("Website Monitoring: Uptime vs Downtime")
     last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    fig.add_annotation(
-        x=0.5,
-        y=-0.1,
-        text=f"Last Updated: {last_updated}",
-        showarrow=False,
-        font=dict(size=12),
-        xref="paper", yref="paper"
-    )
-
-    relative_path = os.path.join("static", "images", "graph.png")
-    fig.write_image(relative_path, format="png") 
+    plt.figtext(0.5, 0.01, f"Last Updated: {last_updated}", ha='center', fontsize=12)
+    absolute_path = "/home/jasjitbansia/Website-Monitoring-Front-End/static/images/graph.png"
+    plt.savefig(absolute_path, bbox_inches='tight')
+    plt.close()  
 
 schedule.every(15).seconds.do(update_graph)
 while True:
