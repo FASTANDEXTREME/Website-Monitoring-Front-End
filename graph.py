@@ -12,7 +12,7 @@ def update_graph():
     spreadsheet = gc.open("Website Monitoring")
     worksheet = spreadsheet.sheet1  
 
-    ## CALCULATE TOTAL TIME OF MONITORING #
+    ## CALCULATE TOTAL TIME OF MONITORING ##
     dates = worksheet.col_values(4) 
     times = worksheet.col_values(5)  
     timestamps = [datetime.strptime(f"{date} {time}", "%d/%m/%Y %I:%M:%S %p") for date, time in zip(dates[1:], times[1:])]
