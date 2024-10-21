@@ -24,8 +24,8 @@ main {
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px; 
+    grid-template-columns: 1fr; 
+    gap: 20px;
 }
 
 .grid-item {
@@ -34,7 +34,8 @@ main {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: transform 0.3s;
-    padding: 20px; 
+    padding: 20px;
+    width: 100%; 
 }
 
 .grid-item img {
