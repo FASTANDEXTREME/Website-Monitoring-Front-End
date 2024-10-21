@@ -1,11 +1,11 @@
 import gspread
 from datetime import timedelta, datetime
 import matplotlib.pyplot as plt
-import schedule
-import time
+import asyncio
 
-gc = gspread.service_account(filename="/home/jasjitbanisa/WEBSIEBTESJRGHSEGHJ/credentials.json")
-def update_graph():
+gc = gspread.service_account(filename="credentials.json")
+
+async def update_graph():
     total_downtime = timedelta()  
 
     spreadsheet = gc.open("Website Monitoring")
@@ -38,13 +38,16 @@ def update_graph():
     plt.title("Website Monitoring: Uptime vs Downtime")
     last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     plt.figtext(0.5, 0.01, f"Last Updated: {last_updated}", ha='center', fontsize=12)
-    absolute_path = "/home/jasjitbansia/Website-Monitoring-Front-End/static/images/graph.png"
+    absolute_path = "static\images\graph.png"
     plt.savefig(absolute_path, bbox_inches='tight')
-    plt.close()  
+    plt.close()
 
-schedule.every(15).seconds.do(update_graph)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+async def scheduler():
+    while True:
+        await update_graph()
+        await asyncio.sleep(15)  
 
+async def main():
+    await scheduler()
 
+asyncio.run(main())
